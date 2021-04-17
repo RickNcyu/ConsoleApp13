@@ -75,6 +75,7 @@ namespace ConsoleApp13
 {
     class Program
     {
+        /*
          //Queue檢查
          public static void PrintValues(IEnumerable myCollection)
           {
@@ -82,6 +83,26 @@ namespace ConsoleApp13
                 Console.Write("{0}\n", obj);
             //Console.WriteLine();
            }
+        public static void PointCheck(Stack myCollection)
+        {
+            string setPath = @"D:/集點設定/集點.txt";
+            string[] row;
+            //點數設定值
+            row = File.ReadAllLines(setPath, Encoding.Default);
+            Console.WriteLine(row[0]);
+            Console.WriteLine(row[1]);
+            Console.WriteLine(row[2]);
+            Console.WriteLine(row[3]);
+            Console.WriteLine(row[4]);
+            foreach (string str in myCollection)
+            {
+                if(str.Contains("tran_tmp")
+                Console.Write(str + "\n");
+            }
+
+
+            //Console.WriteLine();
+        }*/
         //static string connectionString = @"Server=localhost;Database=postgres;User ID=postgres;Password=1234;";
         static void Main(string[] args)
         {
@@ -93,17 +114,21 @@ namespace ConsoleApp13
             arrTemp = temp.Split('值');
             Console.WriteLine(arrTemp[1]);
             string tempcost = File.ReadLines(fileName2, Encoding.Default).Last();*/
-
-
+            
             DateTime date = DateTime.Today;
             var taiwanCalendar = new System.Globalization.TaiwanCalendar();
             var datetime = string.Format("{0}{1}{2}",taiwanCalendar.GetYear(date),date.Month.ToString("00"),date.Day.ToString("00"));
             string path = @"D:/data/" + datetime + "_bkp_c#.sql";
             //Console.WriteLine(datetime);
             //Console.WriteLine(path);
-            string[] arrTemp;
-      
-            Queue temp=new Queue();
+            string[] arrTemp,test;
+            string type;
+
+            //讀取集點設定值
+            string setPath = @"D:/集點設定/集點.txt";
+            string[] row = File.ReadAllLines(setPath, Encoding.Default); ;
+
+            //Stack temp=new Stack();
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -111,14 +136,18 @@ namespace ConsoleApp13
             {
                 if (line.Contains("tran_detl_tmp"))
                 {
-                    temp.Enqueue(line);
+                    //temp.Push(line);
                     Console.WriteLine(line);
+                    
                 }
 
                 if(line.Contains("tran_tmp"))
                 {
-                    temp.Enqueue(line);
+                    //temp.Push(line);
                     Console.WriteLine(line);
+                    test = line.Split(',');
+                    type = test[69].Trim('\'');
+                    Console.WriteLine(type);
                     break;
                 }
 
@@ -126,16 +155,23 @@ namespace ConsoleApp13
             sw.Stop();
             TimeSpan ts2 = sw.Elapsed;
             Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
-            
-            //Queue存放最新一筆資料
-            PrintValues(temp);
 
+            //Queue存放最新一筆資料
+            //PrintValues(temp);
+
+            //PointCheck(temp);
+
+
+            
+
+            
             /*
             //金額/集點設定值
             //int cost=Int32.Parse(tempcost);
             //int divide = Int32.Parse(arrTemp[1]);
             //int Point = Int32.Parse(tempcost) / Int32.Parse(arrTemp[1]);
             Console.WriteLine(Point);
+
                 string WT1 = "Test Print";
                 string B1 = DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss", CultureInfo.InvariantCulture);
                 byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
