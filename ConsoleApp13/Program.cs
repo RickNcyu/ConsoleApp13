@@ -83,10 +83,17 @@ namespace ConsoleApp13
                 Console.Write("{0}\n", obj);
             //Console.WriteLine();
            }
+           */
         public static void PointCheck(Stack myCollection)
         {
             string setPath = @"D:/集點設定/集點.txt";
-            string[] row;
+            string[] row,test;
+            //type 付款方式 cost 總金額 count 總公升 Oil 哪種油品
+            string type="",Oil="";
+            int cost=0;
+            double count=0;
+
+            
             //點數設定值
             row = File.ReadAllLines(setPath, Encoding.Default);
             Console.WriteLine(row[0]);
@@ -94,82 +101,145 @@ namespace ConsoleApp13
             Console.WriteLine(row[2]);
             Console.WriteLine(row[3]);
             Console.WriteLine(row[4]);
-            foreach (string str in myCollection)
+            Console.WriteLine(row[5]);
+            Console.WriteLine(row[6]);
+            Console.WriteLine(row[7]);
+            Console.WriteLine(row[8]);
+            Console.WriteLine(row[9]);
+            Console.WriteLine(row[10]);
+            Console.WriteLine(row[11]);
+            Console.WriteLine(row[12]);
+            Console.WriteLine(row[13]);
+            Console.WriteLine(row[14]);
+
+
+            bool Firstdetl = true;
+                foreach (string str in myCollection)
+                {
+                    test = str.Split(',');
+                    //type表示付款方式EX 901現金
+
+                    if (str.Contains("tran_tmp"))
+                    {
+                        //tran_tmp抓哪種付款方式 type
+                        type = test[69].Trim('\'');
+                        //Console.Write(type + "\n");
+                        
+                    }
+                    else if(str.Contains("tran_detl_tmp"))
+                    {
+                      //抓第一筆資料 因為第二筆為簽帳不需考量
+                      if (Firstdetl == true)
+                      {
+                        //Oil 代表哪種油品 92 95 98 
+                        Oil = test[17].Trim('\'');
+                        //Console.Write(Oil + "\n");
+
+                        cost = Int32.Parse(test[20].Trim('\''));
+                        //Console.WriteLine(cost);
+                        count = Double.Parse(test[21].Trim('\''));
+                        //Console.WriteLine(count);
+                        
+                        Firstdetl = false;
+                      }
+                    }
+                    
+                    
+                }
+
+            //迴圈取得 type(付款方式) Oil(油品) cost(總金額) count(數量.公升)
+            Console.WriteLine("付款方式"+type + " 油品" + Oil + " 總金額" + cost + " 數量(公升)" + count);
+            
+            //待續
+
+            //next判斷是汽油還是柴油 by Oil
+            if (Oil == "113F 51001007") { }
+            //柴油 92 95 98 
+            else if (Oil == "" || Oil == "" || Oil == "") { }
+            //剩下的都是車隊的delt 嗎?
+            //在分類
+            if (Oil == "113F 51001007") { }
+                //柴油 92 95 98 
+                else if (Oil == "" || Oil == "" || Oil == "") { }
+                //剩下的都是車隊的delt 嗎?
+
+
+                //判斷是用哪種付款方式與加哪種油 決定金額要除的設定值
+                if (type == "901")
+                { }
+                else if (type == "931")
+                { }
+                else if (type == "903")
+                { }
+                else if (type == "905")
+                { }
+                else if (type == "939")
+                { }
+
+
+            //用總金額除上對應的油品(柴油或汽油)->付款方式的集點設定值
+            /*string f = "32.9";
+            Console.WriteLine(double.Parse(f));*/
+            //以現金集點 多少元1點
+            if (row[0] == "以現金集點")
             {
-                if(str.Contains("tran_tmp")
-                Console.Write(str + "\n");
             }
+            //以公升
 
 
             //Console.WriteLine();
-        }*/
+        }
         //static string connectionString = @"Server=localhost;Database=postgres;User ID=postgres;Password=1234;";
         static void Main(string[] args)
         {
-            /*string fileName = @"D:/集點設定/集點.txt";
-            string fileName2 = @"D:/集點設定/金額.txt";
-            string temp = File.ReadLines(fileName, Encoding.Default).Last();
-            string[] arrTemp;
-            Console.WriteLine(temp);
-            arrTemp = temp.Split('值');
-            Console.WriteLine(arrTemp[1]);
-            string tempcost = File.ReadLines(fileName2, Encoding.Default).Last();*/
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             
+
             DateTime date = DateTime.Today;
             var taiwanCalendar = new System.Globalization.TaiwanCalendar();
             var datetime = string.Format("{0}{1}{2}",taiwanCalendar.GetYear(date),date.Month.ToString("00"),date.Day.ToString("00"));
             string path = @"D:/data/" + datetime + "_bkp_c#.sql";
             //Console.WriteLine(datetime);
             //Console.WriteLine(path);
-            string[] arrTemp,test;
-            string type;
 
             //讀取集點設定值
-            string setPath = @"D:/集點設定/集點.txt";
-            string[] row = File.ReadAllLines(setPath, Encoding.Default); ;
+            Stack temp=new Stack();
 
-            //Stack temp=new Stack();
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+           
             foreach (var line in File.ReadLines(path).Reverse())
             {
                 if (line.Contains("tran_detl_tmp"))
                 {
-                    //temp.Push(line);
+                    temp.Push(line);
                     Console.WriteLine(line);
                     
                 }
 
                 if(line.Contains("tran_tmp"))
                 {
-                    //temp.Push(line);
+                    temp.Push(line);
                     Console.WriteLine(line);
-                    test = line.Split(',');
-                    type = test[69].Trim('\'');
-                    Console.WriteLine(type);
+                    //Console.WriteLine(type);
                     break;
                 }
 
             }
-            sw.Stop();
-            TimeSpan ts2 = sw.Elapsed;
-            Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
+           
 
             //Queue存放最新一筆資料
             //PrintValues(temp);
 
-            //PointCheck(temp);
+            PointCheck(temp);
+
+
+
 
 
             
-
-            
-            /*
             //金額/集點設定值
-            //int cost=Int32.Parse(tempcost);
-            //int divide = Int32.Parse(arrTemp[1]);
-            //int Point = Int32.Parse(tempcost) / Int32.Parse(arrTemp[1]);
+            /*
+            int Point = 10;
             Console.WriteLine(Point);
 
                 string WT1 = "Test Print";
@@ -200,9 +270,14 @@ namespace ConsoleApp13
                 //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
                 TSCLIB_DLL.printlabel("1", "1");
                 TSCLIB_DLL.closeport();
-            */
+                */
+            sw.Stop();
+            TimeSpan ts2 = sw.Elapsed;
+            Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
+
             Console.Read();
                
+
         }
     }
 }
