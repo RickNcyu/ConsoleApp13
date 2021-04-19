@@ -84,19 +84,26 @@ namespace ConsoleApp13
             //Console.WriteLine();
            }
            */
+        public class Global
+        {
+            public static string name = "";
+        }
         public static double PointCheck(Stack myCollection)
         {
+            
             string setPath = @"D:/集點設定/集點.txt";
-            string[] row,test,Poil;
+            string[] row,test,Poil, Name;
             //type 付款方式 cost 總金額 count 總公升 Oil 哪種油品
             string type="",Oil="";
             int cost=0;
             double count=0,setpoint=0,Point=0;
             int ans = 0;
 
+      
+
             //點數設定值
             row = File.ReadAllLines(setPath, Encoding.Default);
-            Console.WriteLine("row[0]"+row[0]);
+            /*Console.WriteLine("row[0]"+row[0]);
             Console.WriteLine("row[1]" + row[1]);
             Console.WriteLine("row[2]" + row[2]);
             Console.WriteLine("row[3]" + row[3]);
@@ -110,8 +117,11 @@ namespace ConsoleApp13
             Console.WriteLine("row[11]" + row[11]);
             Console.WriteLine("row[12]" + row[12]);
             Console.WriteLine("row[13]" + row[13]);
-            Console.WriteLine("row[14]" + row[14]);
+            Console.WriteLine("row[14]" + row[14]);*/
 
+            //站名
+            Name=row[15].Split('=');
+            Global.name = Name[1];
 
             bool Firstdetl = true;
                 foreach (string str in myCollection)
@@ -146,7 +156,7 @@ namespace ConsoleApp13
                 }
 
             //迴圈取得 type(付款方式) Oil(油品) cost(總金額) count(數量.公升)
-            Console.WriteLine("付款方式"+type + " 油品" + Oil + " 總金額" + cost + " 數量(公升)" + count);
+            //Console.WriteLine("付款方式"+type + " 油品" + Oil + " 總金額" + cost + " 數量(公升)" + count);
 
             
             //next判斷是汽油還是柴油 by Oil
@@ -207,8 +217,9 @@ namespace ConsoleApp13
             //沒有設定值表示不集點 強制結束程式
             if (Poil[1] == "")
             {    
-                Console.WriteLine("設定值為空");
+                //Console.WriteLine("設定值為空");
                 System.Environment.Exit(0);
+              
             }
 
 
@@ -226,10 +237,12 @@ namespace ConsoleApp13
             }
 
             //Point = (int)setpoint;
-            Point = Math.Round(setpoint);
-            Console.WriteLine(setpoint);
+            Point = Math.Round(setpoint,0,MidpointRounding.AwayFromZero);
+            //Console.WriteLine(setpoint);
             //Console.WriteLine(Point);
-            
+
+           
+
             return Point;
         }
         //static string connectionString = @"Server=localhost;Database=postgres;User ID=postgres;Password=1234;";
@@ -245,7 +258,7 @@ namespace ConsoleApp13
             string path = @"D:/data/" + datetime + "_bkp_c#.sql";
             //Console.WriteLine(datetime);
             //Console.WriteLine(path);
-
+            
             //讀取集點設定值
             Stack temp=new Stack();
 
@@ -274,7 +287,9 @@ namespace ConsoleApp13
             //PrintValues(temp);
             double Ans = 0;
             Ans=PointCheck(temp);
-            Console.WriteLine(Ans);
+            //Console.WriteLine(Ans);
+
+            Console.WriteLine(Global.name);
 
             
                 string WT1 = "Test Print";
@@ -294,7 +309,7 @@ namespace ConsoleApp13
 
                 TSCLIB_DLL.clearbuffer();
                 //TSCLIB_DLL.downloadpcx("UL.PCX", "UL.PCX");
-                TSCLIB_DLL.windowsfont(0, 0, 40, 0, 0, 0, "Arial", "東誠加油站 JiH002");
+                TSCLIB_DLL.windowsfont(0, 0, 40, 0, 0, 0, "Arial", Global.name);
                 TSCLIB_DLL.windowsfont(10, 40, 30, 0, 0, 0, "Arial", DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss"));
 
                 //TSCLIB_DLL.windowsfontUnicode(40, 550, 48, 0, 0, 0, "Arial", result_unicode);
@@ -305,7 +320,7 @@ namespace ConsoleApp13
                 //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
                 TSCLIB_DLL.printlabel("1", "1");
                 TSCLIB_DLL.closeport();
-                
+               
             sw.Stop();
             TimeSpan ts2 = sw.Elapsed;
             Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
