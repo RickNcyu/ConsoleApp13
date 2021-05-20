@@ -88,21 +88,23 @@ namespace ConsoleApp13
         {
             public static string name = "";
         }
-        public static double PointCheck(Stack myCollection)
+        public static double PointCheck(Queue myCollection)
         {
             
-            string setPath = @"D:/集點設定/集點.txt";
+            string setPath = @"C:/down/down.txt";
             string[] row,test,Poil, Name;
             //type 付款方式 cost 總金額 count 總公升 Oil 哪種油品
             string type="",Oil="";
             int cost=0;
             double count=0,setpoint=0,Point=0;
-            int ans = 0;
-
+            int ans = 0,loop=0;
+          
       
 
             //點數設定值
             row = File.ReadAllLines(setPath, Encoding.Default);
+            
+            Console.WriteLine("row[0]" + row[0]);
             /*Console.WriteLine("row[0]"+row[0]);
             Console.WriteLine("row[1]" + row[1]);
             Console.WriteLine("row[2]" + row[2]);
@@ -120,43 +122,47 @@ namespace ConsoleApp13
             Console.WriteLine("row[14]" + row[14]);*/
 
             //站名
-            Name=row[15].Split('=');
+            Name =row[15].Split('=');
             Global.name = Name[1];
 
-            bool Firstdetl = true;
+            loop = 0;
                 foreach (string str in myCollection)
                 {
+                
                     test = str.Split(',');
                     //type表示付款方式EX 901現金
+                    //第一筆tmp
+                    if (loop==0)
+                    {
+                    //tran_tmp抓哪種付款方式 type
+                    type = test[15].Trim('\'');
+                    //Console.Write(str);
+                    //Console.Write(type + "\n");
 
-                    if (str.Contains("tran_tmp"))
+                }
+                    //第二筆detl_tmp
+                    else if(loop==1)
                     {
-                        //tran_tmp抓哪種付款方式 type
-                        type = test[69].Trim('\'');
-                        //Console.Write(type + "\n");
-                        
-                    }
-                    else if(str.Contains("tran_detl_tmp"))
-                    {
+                    Console.WriteLine(str);
                       //抓第一筆資料 因為第二筆為簽帳不需考量
-                      if (Firstdetl == true)
-                      {
+                      
                         //Oil 代表哪種油品 92 95 98 
-                        Oil = test[17].Trim('\'');
+                        Oil = test[5].Trim('\'');
+                       // Console.WriteLine(Oil);
                         //Console.Write(Oil + "\n");
 
-                        cost = Int32.Parse(test[20].Trim('\''));
+                        cost = Int32.Parse(test[8].Trim('\''));
                         //Console.WriteLine(cost);
-                        count = Double.Parse(test[21].Trim('\''));
-                        //Console.WriteLine(count);
+                        count = Double.Parse(test[9].Trim('\''));
+                        Console.WriteLine(count);
                         
-                        Firstdetl = false;
-                      }
+                        
                     }
+                loop++;
                 }
-
+            //Console.Read();
             //迴圈取得 type(付款方式) Oil(油品) cost(總金額) count(數量.公升)
-            //Console.WriteLine("付款方式"+type + " 油品" + Oil + " 總金額" + cost + " 數量(公升)" + count);
+            Console.WriteLine("付款方式"+type + " 油品" + Oil + " 總金額" + cost + " 數量(公升)" + count);
 
             
             //next判斷是汽油還是柴油 by Oil
@@ -188,8 +194,8 @@ namespace ConsoleApp13
 
                 }
                 //柴油
-                else if (Oil == "113F 51001007")
-                {
+            else if (Oil == "113F 51001007")
+            {
                     if (type == "901")
                     {
                     ans = 10;
@@ -210,10 +216,14 @@ namespace ConsoleApp13
                     {
                     ans = 14;
                     }
-                }
+            }
+            else//副產品000001
+            {
+                System.Environment.Exit(0);
+            }
             Poil = row[ans].Split('=');
             //Poil[1]為設定值
-            //Console.WriteLine(Poil[1]);
+            Console.WriteLine(Poil[1]);
             //沒有設定值表示不集點 強制結束程式
             if (Poil[1] == "")
             {    
@@ -239,58 +249,154 @@ namespace ConsoleApp13
             //Point = (int)setpoint;
             Point = Math.Round(setpoint,0,MidpointRounding.AwayFromZero);
             //Console.WriteLine(setpoint);
-            //Console.WriteLine(Point);
+            Console.WriteLine(Point);
 
            
 
             return Point;
         }
-        //static string connectionString = @"Server=localhost;Database=postgres;User ID=postgres;Password=1234;";
+        
         static void Main(string[] args)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            
+            //string connectionString = "Server=localhost;Port=5432;Database=;User ID=postgres;Password=1234;";
 
-            DateTime date = DateTime.Today;
+
+            
+            /*DateTime date = DateTime.Today;
             var taiwanCalendar = new System.Globalization.TaiwanCalendar();
             var datetime = string.Format("{0}{1}{2}",taiwanCalendar.GetYear(date),date.Month.ToString("00"),date.Day.ToString("00"));
-            string path = @"D:/data/" + datetime + "_bkp_c#.sql";
+            string path = @"C:\PosSystem\data\" + datetime + "_bkp_c#.sql";*/
+            string path = @"C:/down/tmp.txt";
+            string path2 = @"C:/down/detl_tmp.txt";
             //Console.WriteLine(datetime);
             //Console.WriteLine(path);
-            
-            //讀取集點設定值
-            Stack temp=new Stack();
 
-           
-            foreach (var line in File.ReadLines(path).Reverse())
+            //等待測試
+            /* 
+            Process p = Process.Start(path);
+            //讓 Process 元件等候相關的處理序進入閒置狀態。 
+            p.WaitForInputIdle();
+            //設定要等待相關的處理序結束的時間，這邊設定 7 秒。 
+            p.WaitForExit(7000);
+            */
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            /*
+            using (var conn = new NpgsqlConnection(connectionString))
             {
-                if (line.Contains("tran_detl_tmp"))
+                conn.Open();
+                using (var command = new NpgsqlCommand("SELECT * FROM tran_tmp", conn))
                 {
-                    temp.Push(line);
-                    //Console.WriteLine(line);
-                    
+                    var reader = command.ExecuteReader();
+                    while(reader.Read())
+                    {
+                        Console.WriteLine("1");
+                    }
+                    reader.Close();
                 }
-
-                if(line.Contains("tran_tmp"))
-                {
-                    temp.Push(line);
-                    //Console.WriteLine(line);
-                    //Console.WriteLine(type);
-                    break;
-                }
-
+                
             }
 
 
+            */
+
+
+            //確認檔案存不存在 沒有則建立
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:/down/last.txt", true, System.Text.Encoding.Default))
+            {
+                file.Close();
+            };
+            //old表示暫存的最新上一筆紀錄
+            string old = "";
+            //判斷是否有新資料
+            bool run = false;
+            using (StreamReader sr = new StreamReader(@"C:/down/last.txt", System.Text.Encoding.Default))
+            {
+                string line;
+
+                // Read and display lines from the file until the end of
+                // the file is reached.
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Console.WriteLine("目前的last值" + line);
+                    old = line;
+
+                }
+                //Console.Read();
+                sr.Close();
+            }
+            //Console.WriteLine(old);
+            
+            
+            using (StreamReader sr = new StreamReader(@"C:/down/tmp.txt", System.Text.Encoding.Default))
+            {
+                //false會覆蓋掉
+                using (StreamWriter stw = new StreamWriter(@"C:/down/last.txt", false, Encoding.Default))
+                {
+
+                    //line為每兩秒讀進來最新的tran tmp
+                    string line;
+
+                    // Read and display lines from the file until the end of
+                    // the file is reached.
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        
+                        //Console.WriteLine("測試");
+                        //Console.WriteLine(old+"\r");
+                        //Console.WriteLine(line);
+                        
+                        
+                        //表示有新的交易資料!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! point 執行接下來的操作
+                        if (line!=old)
+                        {
+                            //Console.WriteLine("yes"+"\r");
+                            run = true;
+
+                        }
+                        stw.WriteLine(line);
+
+                    }
+
+                    //Console.Read();
+                }
+            }
+            //Console.WriteLine("結束");
+
+
+            //沒有新資料 結束程式
+            if (run == false)
+            {
+                Console.WriteLine("不執行程式碼");
+                //System.Environment.Exit(0);
+
+            }
+            else
+            {
+                Console.WriteLine("執行程式碼");
+            }
+            Queue temp=new Queue();
+
+            foreach (var line in File.ReadLines(path,Encoding.Default))
+            {
+                    temp.Enqueue(line);
+                    //Console.WriteLine(line);
+            }
+            foreach (var line in File.ReadLines(path2, Encoding.Default))
+            {
+                    temp.Enqueue(line);
+                    //Console.WriteLine(line);
+            }
+
+            
             //Stack存放最新一筆資料
             //PrintValues(temp);
             double Ans = 0;
             Ans=PointCheck(temp);
             //Console.WriteLine(Ans);
-
+            /*
             Console.WriteLine(Global.name);
-
+            
             
                 string WT1 = "Test Print";
                 string B1 = DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss", CultureInfo.InvariantCulture);
@@ -320,12 +426,13 @@ namespace ConsoleApp13
                 //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
                 TSCLIB_DLL.printlabel("1", "1");
                 TSCLIB_DLL.closeport();
-               
+            
+             */
             sw.Stop();
             TimeSpan ts2 = sw.Elapsed;
             Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
-
             Console.Read();
+            
                
 
         }
