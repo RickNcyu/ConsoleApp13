@@ -10,6 +10,8 @@ using System.Data;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.Threading;
+
 public class TSCLIB_DLL
 {
     [DllImport("TSCLIB.dll", EntryPoint = "about")]
@@ -262,103 +264,175 @@ namespace ConsoleApp13
             string pathdes = @"C:/down/need.txt";
 
             string pathlast = @"C:/down/last.txt";
+            //確認stack是不是空的
+            int top = 0;
 
-            //讀取集點設定值
-            //File.Copy(path, pathdes, true);
-            Stack temp = new Stack();
-            Stack last = new Stack();
-
-            //判斷有沒有last
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:/down/last.txt", true, System.Text.Encoding.Default))
-            {
-                last.Push("null");
-                file.Close();
-            };
-            //上一筆最新資料
-            foreach (var line in File.ReadLines(pathlast).Reverse())
-            {
-                last.Push(line);
-            }
-            //最新資料比對
-            foreach (var line in File.ReadLines(pathdes).Reverse())
-            {
-                if (line.Contains("tran_detl_tmp"))
+            /*
+                while (true)
                 {
-                    temp.Push(line);
+                using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                {
+
+                    var reader = new StreamReader(file);
+                    var line = reader.ReadToEnd();
+                    Console.WriteLine(line);
+                    using (var wrfile = new FileStream(pathdes, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                    {
+
+
+                        var writer = new StreamWriter(wrfile);
+                        writer.Write(line);
+                        writer.Flush();
+                    }
                 }
 
-                if (line.Contains("tran_tmp"))
-                {
-                    temp.Push(line);
-                    break;
+                    Thread.Sleep(2000);
+                }
+           */ 
+            while (true)
+            {
+                //sql如果不存在==>12點過後還沒有產生最新一筆交易
+                if (File.Exists(path))
+                { 
+
+                    /*//沒有交易 空白的
+                    if (File.ReadAllText(pathdes) == "") {
+                        
+                        System.Environment.Exit(0);
+                    }*/
+
+                    //讀取集點設定值
+                    //File.Copy(path, pathdes, true);
+                    //Console.WriteLine(File.ReadAllText(path));
+                    
+                    using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                        {
+
+                            var reader = new StreamReader(file);
+                            var line = reader.ReadToEnd();
+                            Console.WriteLine(line);
+                            using (var wrfile = new FileStream(pathdes, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                            {
+
+
+                                var writer = new StreamWriter(wrfile);
+                                writer.Write(line);
+                                writer.Flush();
+                            }
+                           
+                        }
+                        
+
+                    Stack temp = new Stack();
+                    Stack last = new Stack();
+               
+                   
+                    
+     
+                    //判斷有沒有last
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:/down/last.txt", true, System.Text.Encoding.Default))
+                    {
+                        last.Push("null");
+                        file.Close();
+                    };
+                    //上一筆最新資料
+                    foreach (var line in File.ReadLines(pathlast).Reverse())
+                    {
+                        last.Push(line);
+                    }
+                    //最新資料比對
+                    foreach (var line in File.ReadLines(pathdes).Reverse())
+                    {
+                       
+                        if (line.Contains("tran_detl_tmp"))
+                        {
+                            temp.Push(line);
+                            top++;
+                        }
+
+                        if (line.Contains("tran_tmp"))
+                        {
+                            temp.Push(line);
+                            top++;
+                            break;
+                            
+                        }
+                    }
+
+                  
+                    using (StreamWriter svw = new StreamWriter(pathlast))
+                    {
+                        foreach (string str in temp)
+                        {
+                            svw.WriteLine(str);
+                        }
+                    }
+                    if(top==0)
+                    { //Console.WriteLine("空的"); 
+                      System.Environment.Exit(0);
+                    }
+                    //Console.Read();
+                    string ls1, ls2;
+                    ls1 = temp.Peek().ToString();
+                    Console.WriteLine(ls1);
+                    ls2 = last.Peek().ToString();
+                    Console.WriteLine(ls2);
+                    Console.WriteLine(string.Compare(ls1, ls2));
+
+                    //與上一筆資料不同 有新資料
+                    if (string.Compare(ls1, ls2) != 0)
+                    {
+                        Console.WriteLine("yes");
+
+
+                        //Stack存放最新一筆資料
+                        //PrintValues(temp);
+                        double Ans = 0;
+                        Ans = PointCheck(temp);
+                        //Console.WriteLine(Ans);
+
+                        Console.WriteLine(Global.name);
+
+                        /*
+                        string WT1 = "Test Print";
+                        string B1 = DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss", CultureInfo.InvariantCulture);
+                        byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
+                        byte[] result_utf8 = System.Text.Encoding.UTF8.GetBytes("TEXT 40,620,\"ARIAL.TTF\",0,12,12,\"utf8 test Wörter auf Deutsch\"");
+                        System.Diagnostics.Debug.WriteLine(B1);
+                        //TSCLIB_DLL.about();
+                        byte status = TSCLIB_DLL.usbportqueryprinter();//0 = idle, 1 = head open, 16 = pause, following <ESC>!? command of TSPL manual
+                        TSCLIB_DLL.openport("TSC TTP-243E Pro");
+                        TSCLIB_DLL.sendcommand("SIZE 40 mm, 20 mm");
+                        TSCLIB_DLL.sendcommand("SPEED 4");
+                        TSCLIB_DLL.sendcommand("DENSITY 12");
+                        TSCLIB_DLL.sendcommand("DIRECTION 1");
+                        TSCLIB_DLL.sendcommand("SET TEAR ON");
+                        TSCLIB_DLL.sendcommand("CODEPAGE UTF-8");
+
+                        TSCLIB_DLL.clearbuffer();
+                        //TSCLIB_DLL.downloadpcx("UL.PCX", "UL.PCX");
+                        TSCLIB_DLL.windowsfont(0, 0, 40, 0, 0, 0, "Arial", Global.name);
+                        TSCLIB_DLL.windowsfont(10, 40, 30, 0, 0, 0, "Arial", DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss"));
+
+                        //TSCLIB_DLL.windowsfontUnicode(40, 550, 48, 0, 0, 0, "Arial", result_unicode);
+                        //TSCLIB_DLL.sendcommand("PUTPCX 40,40,\"UL.PCX\"");
+                        //TSCLIB_DLL.sendBinaryData(result_utf8, result_utf8.Length);
+                        TSCLIB_DLL.barcode("10", "70", "128", "35", "0", "0", "1", "1", B1);
+                        TSCLIB_DLL.windowsfont(10, 110, 50, 0, 0, 0, "Arial", "點數" + Ans.ToString() + "點");
+                        //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
+                        TSCLIB_DLL.printlabel("1", "1");
+                        TSCLIB_DLL.closeport();
+                        */
+                        sw.Stop();
+                        TimeSpan ts2 = sw.Elapsed;
+                        Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
+
+
+                    }
+                    //Thread.Sleep(2000);
                 }
             }
-            using (StreamWriter svw = new StreamWriter(pathlast))
-            {
-                foreach (string str in temp)
-                {
-                    svw.WriteLine(str);
-                }
-            }
-
-            string ls1, ls2;
-            ls1 = temp.Peek().ToString();
-            Console.WriteLine(ls1);
-            ls2 = last.Peek().ToString();
-            Console.WriteLine(ls2);
-            Console.WriteLine(string.Compare(ls1, ls2));
-
-            //與上一筆資料不同 有新資料
-            if (string.Compare(ls1, ls2) == 0)
-            {
-                Console.WriteLine("yes");
-
-
-                //Stack存放最新一筆資料
-                //PrintValues(temp);
-                double Ans = 0;
-                Ans = PointCheck(temp);
-                //Console.WriteLine(Ans);
-
-                Console.WriteLine(Global.name);
-
-                /*
-                    string WT1 = "Test Print";
-                    string B1 = DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss", CultureInfo.InvariantCulture);
-                    byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
-                    byte[] result_utf8 = System.Text.Encoding.UTF8.GetBytes("TEXT 40,620,\"ARIAL.TTF\",0,12,12,\"utf8 test Wörter auf Deutsch\"");
-                    System.Diagnostics.Debug.WriteLine(B1);
-                    //TSCLIB_DLL.about();
-                    byte status = TSCLIB_DLL.usbportqueryprinter();//0 = idle, 1 = head open, 16 = pause, following <ESC>!? command of TSPL manual
-                    TSCLIB_DLL.openport("TSC TTP-243E Pro");
-                    TSCLIB_DLL.sendcommand("SIZE 40 mm, 20 mm");
-                    TSCLIB_DLL.sendcommand("SPEED 4");
-                    TSCLIB_DLL.sendcommand("DENSITY 12");
-                    TSCLIB_DLL.sendcommand("DIRECTION 1");
-                    TSCLIB_DLL.sendcommand("SET TEAR ON");
-                    TSCLIB_DLL.sendcommand("CODEPAGE UTF-8");
-
-                    TSCLIB_DLL.clearbuffer();
-                    //TSCLIB_DLL.downloadpcx("UL.PCX", "UL.PCX");
-                    TSCLIB_DLL.windowsfont(0, 0, 40, 0, 0, 0, "Arial", Global.name);
-                    TSCLIB_DLL.windowsfont(10, 40, 30, 0, 0, 0, "Arial", DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss"));
-
-                    //TSCLIB_DLL.windowsfontUnicode(40, 550, 48, 0, 0, 0, "Arial", result_unicode);
-                    //TSCLIB_DLL.sendcommand("PUTPCX 40,40,\"UL.PCX\"");
-                    //TSCLIB_DLL.sendBinaryData(result_utf8, result_utf8.Length);
-                    TSCLIB_DLL.barcode("10", "70", "128", "35", "0", "0", "1", "1", B1);
-                    TSCLIB_DLL.windowsfont(10, 110, 50, 0, 0, 0, "Arial", "點數"+Ans.ToString()+"點");
-                    //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
-                    TSCLIB_DLL.printlabel("1", "1");
-                    TSCLIB_DLL.closeport();
-                   */
-                sw.Stop();
-                TimeSpan ts2 = sw.Elapsed;
-                Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
-
-
-            }
-            Console.Read();
+            //Console.Read();
 
         }
     }
