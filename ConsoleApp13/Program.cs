@@ -398,7 +398,7 @@ namespace ConsoleApp13
                 Console.WriteLine("Stopwatch總共花費{0}ms.", ts2.TotalMilliseconds);
 
                 Thread.Sleep(2000);
-
+                
 
             }
         }
