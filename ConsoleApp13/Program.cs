@@ -248,31 +248,12 @@ namespace ConsoleApp13
             //集點設定檔
             string setPath = @"C:/down/down.txt";
 
-            //判斷哪一島 //////////////////////////////
-            string hostName = Dns.GetHostName(); // Retrive the Name of HOST  
-            //Console.WriteLine(hostName);
-            // Get the IP  
-            string myIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
-            string[] iprowmy = myIP.Split('.');
-            //iprowmy[0]=10, iprowmy[1]=85, iprowmy[2]=138,iprowmy[3]=20  
-            string selects="",selects2="";
-            if (iprowmy[3] == "10")
-            { selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'01'"); 
-              selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'01'");
-            }
-            if (iprowmy[3] == "20") 
-            { selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'02'");
-                selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'02'");
-            }
-            if (iprowmy[3] == "30")
-            { selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'03'");
-                selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'03'");
-            }
-            ////////////////////////////////////////////
+            
 
             //程式迴圈偵測1秒一次
             while (true)
             {
+                
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 //設定值
@@ -282,8 +263,28 @@ namespace ConsoleApp13
                 try
                 {
                     
-                    string[] row;
+                    string[] row,iprow;
                     row = File.ReadAllLines(setPath, Encoding.Default);
+                    string selects = "", selects2 = "";
+                 
+                    //down裡的ip判斷哪一島
+                    iprow = row[16].Split('.');
+                    
+                    if (iprow[3] == "10")
+                    {
+                        selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'01'");
+                        selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'01'");
+                    }
+                    if (iprow[3] == "20")
+                    {
+                        selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'02'");
+                        selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'02'");
+                    }
+                    if (iprow[3] == "30")
+                    {
+                        selects = String.Format(@"select * from tran_tmp WHERE island={0} ORDER BY tran_time DESC LIMIT 1", "'03'");
+                        selects2 = String.Format(@"select * from tran_detl_tmp WHERE island={0} and seq='1' ORDER BY tran_time DESC LIMIT 1", "'03'");
+                    }
                     //Console.WriteLine(row[16]);
                     //row[16]改掉改成各站IP
                     PingReply reply = pingSender.Send(Gasstation);
@@ -401,7 +402,7 @@ namespace ConsoleApp13
                                 
                                 Console.WriteLine(Global.name);
 
-                                /*
+                                
                                     string WT1 = "Test Print";
                                     string B1 = DateTime.Now.ToString("yyyy/MM/dd  HH:mm:ss", CultureInfo.InvariantCulture);
                                     byte[] result_unicode = System.Text.Encoding.GetEncoding("utf-16").GetBytes("unicode test");
@@ -430,7 +431,7 @@ namespace ConsoleApp13
                                     //TSCLIB_DLL.printerfont("20", "40", "0", "0", "15", "15", WT1);
                                     TSCLIB_DLL.printlabel("1", "1");
                                     TSCLIB_DLL.closeport();
-                               */
+                               
                                  
                             }
                         }
